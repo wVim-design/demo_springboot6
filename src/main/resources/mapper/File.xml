@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="fileSys.mapper.FileMapper">
+
+    <select id="selectFileNum"  resultType="java.lang.Integer">
+        select count(*) from t_file
+        <where>
+            <if test="name!=null and name!=''">
+                and name like concat ('%',#{name},'%')
+            </if>
+            <if test="startTime!=null and startTime!=''">
+                and convert(upload_time,char) &gt;= #{startTime}
+            </if>
+            <if test="endTime!=null and endTime!=''">
+                and convert(upload_time,char) &lt;= #{endTime}
+            </if>
+            <if test="typeId!=null and typeId!=''">
+                and convert (type_id,char) = #{typeId}
+            </if>
+
+            <if test="statusId!=null and statusId!=''">
+                and status_id= #{statusId}
+            </if>
+            <if test="userId!=null and userId!=''">
+                and user_id= #{userId}
+            </if>
+
+        </where>
+    </select>
+
+    <select id="selectFileList" parameterType="java.util.HashMap" resultType="fileSys.bean.MyFileInfo">
+        select a.id,a.type_id,a.name,convert (a.upload_time,char) as upload_time,a.download_times,b.suffix,c.name as user_name,d.name as status_name
+        from t_file as a,t_type as b,t_user as c,t_params as d
+        where a.type_id = b.id and a.user_id = c.id and convert (a.status_id,char) = d.value and d.type='文件状态'
+        <if test="name!=null and name!=''">
+            and a.name like concat ('%',#{name},'%')
+        </if>
+        <if test="startTime!=null and startTime!=''">
+            and convert(a.upload_time,char) &gt;= #{startTime}
+        </if>
+        <if test="endTime!=null and endTime!=''">
+            and convert(a.upload_time,char) &lt;= #{endTime}
+        </if>
+        <if test="typeId!=null and typeId!=''">
+            and convert (a.type_id,char) = #{typeId}
+        </if>
+
+        <if test="statusId!=null and statusId!=''">
+            and a.status_id= #{statusId}
+        </if>
+        <if test="userId!=null and userId!=''">
+            and a.user_id= #{userId}
+        </if>
+        limit #{pageSize} offset #{offset}
+    </select>
+
+
+    <update id="changeFileStatus" >
+        update t_file set status_id=#{statusId} where id=#{id}
+    </update>
+
+    <insert id="insertFile" keyProperty="id" useGeneratedKeys="true">
+        insert into t_file (name,type_id,download_score,description,user_id,path) values
+        (#{name},#{typeId},#{downloadScore},#{description},#{userId},#{path})
+    </insert>
+
+    <select id="fileFileById" resultType="fileSys.bean.MyFile">
+        select * from t_file where id = #{id}
+    </select>
+
+
+
+
+
+</mapper>

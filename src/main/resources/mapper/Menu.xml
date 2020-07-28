@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="fileSys.mapper.MenuMapper">
+
+    <select id="findMenuList"  resultMap="menuList">
+        select m1.name as m1_name,m2.url as m2_url,m2.name as m2_name from t_menu m1 inner join t_menu m2 on m1.id=m2.parentid inner join t_role_menu rm
+    on m2.id = rm.menu_id inner join t_admin a on rm.role_id = a.role_id where a.id=#{id};
+
+    </select>
+
+    <resultMap id="menuList" type="fileSys.bean.Menu">
+        <result property="name" column="m1_name"></result>
+        <collection property="menus" ofType="fileSys.bean.Menu" >
+            <result property="name" column="m2_name"></result>
+            <result property="url" column="m2_url"></result>
+        </collection>
+    </resultMap>
+
+
+
+</mapper>

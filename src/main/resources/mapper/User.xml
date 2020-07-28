@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="fileSys.mapper.UserMapper">
+    <select id="accTest" parameterType="String" resultType="java.lang.Integer">
+        select count(*) from t_user where account=#{account}
+    </select>
+
+    <select id="login" parameterType="String" resultType="fileSys.bean.User">
+        select * from t_user where account=#{account}
+    </select>
+
+    <insert id="register" parameterType="fileSys.bean.User">
+        insert into t_user (account,name,password,sex,phone,email,score) values
+        (#{account},#{name},#{password},#{sex},#{phone},#{email},(select value from t_params where type = '注册奖励积分'))
+    </insert>
+
+    <select id="selectUserNum"   resultType="java.lang.Integer">
+        select count(*) from t_user
+        <where>
+            <if test="name!=null and name!=''">
+                and name like concat ('%',#{name},'%')
+            </if>
+            <if test="startTime!=null and startTime!=''">
+                and convert(regtime,char) &gt;= #{startTime}
+            </if>
+            <if test="endTime!=null and endTime!=''">
+                and convert(regtime,char) &lt;= #{endTime}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectUserList"  resultType="fileSys.bean.UserInfo">
+        select a.id,a.account,a.name,a.score,a.upload_count,a.download_count,convert(a.regtime,char) as regtime,b.name as level_name,c.name as status_name from t_user a,t_level b,t_params c
+        where a.level_id = b.id and convert(a.status_id,char)=c.value and c.english_type='userStatus'
+        <if test="name!=null and name!=''">
+            and a.name like concat ('%',#{name},'%')
+        </if>
+        <if test="startTime!=null and startTime!=''">
+            and convert(a.regtime,char) &gt;= #{startTime}
+        </if>
+        <if test="endTime!=null and endTime!=''">
+            and convert(a.regtime,char) &lt;= #{endTime}
+        </if>
+        limit #{pageSize} offset #{offset}
+    </select>
+
+    <update id="changeUserStatus" >
+        update t_user set status_id=#{statusId} where id=#{id}
+    </update>
+
+
+    <select id="findUserInfo" resultType="fileSys.bean.UserInfo">
+        select u.*,l.name as level_name from t_user u,t_level l where u.level_id = l.id and u.id=#{userId}
+    </select>
+
+    <update id="modifyMeg">
+       update t_user
+       <set>
+           <if test="name!=null">name = #{name},</if>
+           <if test="password!=null">password=#{password},</if>
+           <if test="phone!=null">phone=#{phone},</if>
+           <if test="email!=null">email=#{email}</if>
+       </set>
+       where id = #{id}
+    </update>
+
+    <update id="updateUserForUpload">
+        update t_user set score = score+#{param2},upload_count = upload_count+1 where id = #{param1}
+    </update>
+
+    <update id="updateUserForDownload">
+        update t_user set score = score-#{param2},download_count = download_count+1 where id = #{param1}
+    </update>
+
+
+
+</mapper>

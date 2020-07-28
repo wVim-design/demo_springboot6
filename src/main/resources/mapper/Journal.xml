@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="fileSys.mapper.JournalMapper">
+
+    <insert id="insertJournal" >
+        insert into t_journal (admin_account,event) values (#{adminAccount},#{event})
+    </insert>
+
+    <delete id="deleteJournal" >
+        delete from t_journal where id = #{journalId}
+    </delete>
+
+    <select id="selectJournalNum"   resultType="java.lang.Integer">
+        select count(*) from t_journal
+        <where>
+            <if test="adminAccount!=null and adminAccount!=''">
+                and admin_account like concat ('%',#{adminAccount},'%')
+            </if>
+            <if test="startTime!=null and startTime!=''">
+                and convert(create_time,char) &gt;= #{startTime}
+            </if>
+            <if test="endTime!=null and endTime!=''">
+                and convert(create_time,char) &lt;= #{endTime}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectJournalList"  resultType="fileSys.bean.Journal">
+        select a.id,a.admin_account,a.event,convert(a.create_time,char) as create_time from t_journal as a
+        <where>
+        <if test="adminAccount!=null and adminAccount!=''">
+            and a.admin_account like concat ('%',#{adminAccount},'%')
+        </if>
+        <if test="startTime!=null and startTime!=''">
+            and convert(a.create_time,char) &gt;= #{startTime}
+        </if>
+        <if test="endTime!=null and endTime!=''">
+            and convert(a.create_time,char) &lt;= #{endTime}
+        </if>
+        </where>
+        limit #{pageSize} offset #{offset}
+    </select>
+
+</mapper>
